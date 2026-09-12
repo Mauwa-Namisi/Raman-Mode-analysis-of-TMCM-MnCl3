@@ -38,8 +38,8 @@ tmcm-mncl3-raman/
 │   └──
 ├── scripts/
 │   ├── Extract-displacements.ipynb  <- generate phonon_displacements/ folder with the disptacement of each of the 123 modes
-│   └── raman_mode_classifier.py      <- the mode classifier script (main)
-│   └── raman.ipynb                   <- same code for Jupyter notebook
+│   └── raman.ipynb      <- the mode classifier Jupyter notebook script (main)
+
 
 ```
 
