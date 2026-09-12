@@ -41,10 +41,14 @@ tmcm-mncl3-raman/
 │   ├── vasp_raman.dat            <- mode frequencies + Raman activities
 │   ├── phonon_displacements/     <- one file per mode: 123 x {mode}.txt
 │   │                                  (columns: index dx dy dz)
-│   └──          
+│   └──
+├── scripts/
+│   ├── Extract-displacements.ipynb  <- generate phonon_displacements/ folder with the disptacement of each of the 123 modes
+│   └── make_notebook.py              <- rebuild the .ipynb from the .py        
 ```
 
 ---
+
 
 ## Quick start
 
@@ -204,65 +208,23 @@ must be on line 6 (`Mn Cl N C H`) exactly as in this repo.
 ---
 
 ## What the assignment labels mean
-
-| Label | Symbol | Motion | Typical region |
-|-------|--------|--------|----------------|
-| CH2 / CH3 symmetric stretch | νs(C–H) | both/all C–H bonds stretch in phase | 2850–3000 cm⁻¹ |
-| CH2 / CH3 asymmetric stretch | νas(C–H) | bonds stretch out of phase | 2950–3100 cm⁻¹ |
-| CH2 scissoring | β(CH2) | H–C–H angle opens/closes in-bond plane | 1400–1500 cm⁻¹ |
-| CH3 umbrella | δs(CH3) | three H move together ("umbrella") | 1350–1450 cm⁻¹ |
-| CH2 wagging | ω(CH2) | H's swing out of the bond plane, in phase | 1200–1350 cm⁻¹ |
-| CH2 twisting | τ(CH2) | H's swing out of plane, out of phase | 900–1250 cm⁻¹ |
-| CH2 rocking | ρ(CH2) | H's rock in the bond plane, in phase | 700–1000 cm⁻¹ |
-| C–N stretch | ν(C–N) | N–C framework stretch | 750–1000 cm⁻¹ |
-| C–Cl stretch | ν(C–Cl) | C–Cl (chloromethyl) stretch | 650–800 cm⁻¹ |
-| Mn–Cl symmetric stretch | νs(Mn–Cl) | all 6 Mn–Cl bonds breathe | 240–260 cm⁻¹ |
-| Mn–Cl asymmetric stretch | νas(Mn–Cl) | Mn–Cl bonds stretch out of phase | 100–250 cm⁻¹ |
-| MnCl6 deformation | δ(MnCl6) | Cl–Mn–Cl angle bends | < 300 cm⁻¹ |
-
-The frequency columns are *general* guides; exact values depend on the
-functional and the crystal environment.
-
----
-
-## Known limitations (please read)
-
-These are honest caveats, documented in detail in `docs/report.pdf`:
-
-1. **A′/A″ symmetry is a heuristic, not group theory.** It is computed by
-   projecting the eigenvector onto the lattice *b*-axis and thresholding the
-   out-of-plane fraction at 0.5. It is meaningful only if the crystal really
-   has a mirror plane (Cₛ point group); TMCM-MnCl3 is triclinic
-   (pseudo-monoclinic) here. Use phonopy/`findsym` + irreducible representations
-   for the paper.
-2. **No mass weighting.** VASP normal modes are mass-weighted; this code uses
-   the raw eigenvector components. The ranking still works because displacements
-   are compared within the same mode, but absolute magnitudes across modes are
-   not in physical units.
-3. **Not every label is covered** — e.g. CH3 rocking/in-plane deformation and
-   N–C torsion are not detected; some CH2 rocking calls at ~3000 cm⁻¹ look like
-   stretch misclassifications.
-4. **No Raman-activity cutoff.** Every mode in the frequency window is listed,
-   even with negligible activity.
-5. `classify_cl_origin()`, `perp_disp()`, `CONSOLE_TOP_N` and the `MASSES`
-   dict are currently unused (dead code / future work).
-
----
+ν - stretching
+ω - wagging
+τ - twisting
+ρ - rocking
+β - Scissoring
+as - asymmetric
+s - symmetric
 
 ## Reproducing everything from scratch
 
 ```bash
 # 1. extract per-mode displacement files from your OUTCAR from DFPT calculations
-python scripts/extract_modes_from_outcar.py OUTCAR.phon data/phonon_displacements
+- Extract-displacements.ipynb 
 
-# 2. (optional) symlink the OUTCAR for symmetry labels
-ln -s "$(pwd)/OUTCAR.phon" data/OUTCAR.phon
-
-# 3. classify
+# 2. classify the modes
 python raman_mode_classifier.py
 
-# 4. build the docs (needs a LaTeX distribution)
-cd docs && pdflatex report.tex && pdflatex report.tex
 ```
 
 ---
