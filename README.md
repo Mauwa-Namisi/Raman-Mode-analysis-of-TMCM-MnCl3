@@ -81,33 +81,7 @@ ln -s /path/to/your/OUTCAR.phon .
 > python ../raman_mode_classifier.py
 > ```
 
-### 3. What comes out
 
-| File | Content |
-|------|---------|
-| `phonon_mode_report.txt` | human-readable, every mode + its top assignments |
-| `phonon_mode_summary.csv` | one row per mode: number, cm⁻¹, activity, symmetry, 4 assignments |
-| `raman_table.tex` | LaTeX table for your paper |
-
-Sample of `phonon_mode_summary.csv`:
-
-```
-Mode,Frequency_cm-1,Raman_Activity,Symmetry,Assign_1,Assign_2,...
-15,2999.91,6455.91,$A'$,"CH3 symmetric stretching (C5)",...
-68,788.84,392.60,$A''$,"C-Cl asymmetric stretching (C1-Cl7)",...
-```
-
-### 4. Inspect the results
-
-```bash
-head -20 outputs/phonon_mode_report.txt
-```
-
-or open the notebook:
-
-```bash
-jupyter notebook raman.ipynb
-```
 
 ---
 
@@ -115,12 +89,11 @@ jupyter notebook raman.ipynb
 
 ### `data/vasp_raman.dat`
 
-Produced by the phonopy [`vasp_raman.py`](https://phonopy.github.io/phonopy/) accessory (Raman-tensor post-processing).
-Five columns (`#` lines are comments):
+Produced using from the DFT OUTCAR using https://github.com/raman-sc/VASP.
+Five columns :
 
 ```
 # mode    freq(cm-1)    alpha    beta2    activity
-124     0.22823   0.0000000   0.0000016   0.0000114
 ...
 ```
 
@@ -133,31 +106,17 @@ Five columns (`#` lines are comments):
 Numeric columns per line:
 
 ```
-# mode 90
-# index dx dy dz
-1 -0.001090 0.000436 -0.000493
+
+# atom_index dx dy dz
 ...
 ```
 
-Each line is one atom (`index` = 1..42, matching the POSCAR atom order),
-and `dx dy dz` is its **displacement vector** (Å) in that mode. These come
+Each line is the atom index matching the POSCAR atom order and
+`dx dy dz` is its **displacement vector** (Å) in that mode. These come
 straight from the *"Eigenvectors and eigenvalues of the dynamical matrix"*
-section of `OUTCAR.phon`. Regenerate them with:
+section of `OUTCAR`. Regenerate them with scripts/Extract-displacements.ipynb
 
-```bash
-python scripts/extract_modes_from_outcar.py /path/to/OUTCAR.phon data/phonon_displacements
-```
 
-> The extracted files are already committed so you can run the pipeline
-> without owning a 2.4 GB OUTCAR. Only the symmetry column needs the real
-> OUTCAR.
-
-### `data/POSCAR`
-
-VASP5 structure file (42 atoms: 2 Mn + 8 Cl + 2 N + 8 C + 22 H). The species
-must be on line 6 (`Mn Cl N C H`) exactly as in this repo.
-
----
 
 ## How the classification works (short version)
 
@@ -165,9 +124,9 @@ must be on line 6 (`Mn Cl N C H`) exactly as in this repo.
    wraps all positions into the unit cell (periodic boundary conditions).
 
 2. **Build the bond graph.** Two atoms are neighbours if their
-   minimum-image distance is below a per-element-pair cutoff
-   (`BOND_CUTOFFS`). This gives Mn a 6-fold Cl octahedron, the N four C
-   neighbours (TMCM = N(CH3)3·CH2Cl), the two CH2Cl carbons an
+   minimum-image distance is below a cutoff
+   (`BOND_CUTOFFS`). This gives Mn a 6-Cl octahedra, the N four C
+   neighbours, the two CH2Cl carbons an
    N+2H+Cl neighbourhood, and the six CH3 carbons an N+3H neighbourhood.
 
 3. **For each mode**:
@@ -175,39 +134,19 @@ must be on line 6 (`Mn Cl N C H`) exactly as in this repo.
    - Measure **bond-length changes** (`Δr`) between every bonded pair.
    - Measure **angle changes** (`Δθ`) at every relevant centre
      (H-C-H, Cl-C-N, Cl-Mn-Cl, …).
-   - Project H-pair motion onto a local frame (`n`, `t`) at the carbon
-     to separate **wagging** (out-of-plane, in phase), **twisting**
-     (out-of-plane, antiphase), **rocking** (in-plane, in phase) from
-     **scissoring** (in-plane, antiphase, caught via the H-C-H angle).
 
-4. **Thresholds decide what counts** (see table below).
-
+4. **Thresholds**.
+   BOND_CUTOFFS - tuned to covalent radii; defines the bond graph
+   ANGLE_CHANGE_THRESHOLD - minimum angle-change for bend/scissor/wag labels. Angles that move < 10° are ignored
+   BOND_ABS_THRESHOLD -minimum absolute bond-change for a "stretch" label. A bond that stretches less than 10⁻² Å is ignored |
+   
 5. **Rank and report.** Assignments are sorted by an internal *magnitude*
    and the top few written to the CSV/LaTeX outputs.
 
-### The thresholds
-
-| Constant | Value | Meaning | What it implies |
-|----------|-------|---------|-----------------|
-| `FREQ_MIN` / `FREQ_MAX` | 5 / 3200 cm⁻¹ | only analyse this frequency window | drops the 3 acoustic modes (0.2–0.5 cm⁻¹) and nothing else |
-| `CH_STRETCH_MIN` | 2800 cm⁻¹ | C–H stretch is only labelled above this | prevents a bend/skeleton mode being called a stretch |
-| `DISP_ADAPTIVE_FRACTION` | 0.02 | adaptive floor = 2 % of the *largest atomic displacement* in the mode | secondary participants need to move ≥ 2 % of the strongest mover |
-| `BOND_ABS_THRESHOLD` | 0.01 Å | absolute bond-change floor for a "stretch" label | a bond that stretches less than 10⁻² Å is ignored |
-| `ANGLE_CHANGE_THRESHOLD` | 10° | angle-change floor for bend/scissor/wag labels | angles that move < 10° are ignored |
-| `RELATIVE_ASSIGNMENT_THRESHOLD` | 0.30 | a LaTeX assignment needs magnitude ≥ 30 % of the mode's top magnitude | keeps the table meaningful, discards weak caveats |
-| `MAX_LATEX_ASSIGNMENTS` | 4 | max labels per LaTeX row | keeps the table compact |
-| `BOND_CUTOFFS` | C–H 1.1, N–C 1.52, Mn–Cl 2.6, C–Cl 1.78, Cl–Cl 3.13 Å | neighbour definition | tuned to covalent radii; defines the bond graph |
-
-> **Units note (fixed).** Length-based motions (bond stretches, wag, rock, twist,
-> umbrella) are ranked in Angstrom; angle changes (scissoring, bend) are in
-> degrees. The ranking keeps these two sets separate so that a 20 degscissor no
-> longer crowds out a 0.5 A wag.  In the LaTeX table the 0.30 relative threshold
-> is applied only within the length set; angle-based assignments then fill the
-> remaining slots up to `MAX_LATEX_ASSIGNMENTS`.
 
 ---
 
-## What the assignment labels mean
+## Assignment labels Legend
 ν - stretching
 ω - wagging
 τ - twisting
