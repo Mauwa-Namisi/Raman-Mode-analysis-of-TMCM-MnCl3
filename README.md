@@ -8,8 +8,7 @@ from VASP phonon data.
 The TMCM-MnCl3 in Cc phase has no centrosymmetry, so all 3N−3 = 123 vibrational modes are
 Raman-active. This repository assigns each mode a physical label — e.g.
 _C–H stretch_, _CH3 twisting_, _CH2 wagging_, _Mn–Cl stretching_ — by analysing
-the **atomic displacement pattern (eigenvector)** of every mode against the
-relaxed crystal structure.
+the eigenvector of every mode against the relaxed POSCAR.
 
 ---
 
