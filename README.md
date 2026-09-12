@@ -2,27 +2,26 @@
 
 Classify the computed Raman-active vibrational modes of the hybrid
 ferroelectric perovskite **TMCM-MnCl3**
-(trimethylchloromethylammonium trichloromanganate(II), [(CH3)3NCH2Cl]MnCl3)
-from first-principles (DFT) phonon data.
+(TMCM = trimethylchloromethylammonium, [(CH3)3NCH2Cl])
+from VASP phonon data.
 
-The material has no centrosymmetry, so all 3N−3 = 123 vibrational modes are
+The TMCM-MnCl3 in Cc phase has no centrosymmetry, so all 3N−3 = 123 vibrational modes are
 Raman-active. This repository assigns each mode a physical label — e.g.
-_C–H stretch_, _CH3 umbrella_, _CH2 wagging_, _Mn–Cl stretch_ — by analysing
+_C–H stretch_, _CH3 twisting_, _CH2 wagging_, _Mn–Cl stretching_ — by analysing
 the **atomic displacement pattern (eigenvector)** of every mode against the
 relaxed crystal structure.
 
 ---
 
-## Why this is worth doing
+## Importance
 
-A DFT phonon calculation (VASP + phonopy) gives you a list of modes, each with a
+A DFT phonon calculation gives you a list of modes, each with a
 frequency and a Raman activity, but the mode numbers carry no physical meaning.
 Before you can compare theory to an experimental Raman spectrum you need to know
-**what each peak is**: is the 3 000 cm⁻¹ peak a C–H stretch? Is the 250 cm⁻¹
-peak a symmetric Mn–Cl breathing mode? This tool answers that automatically.
+**what each peak is**: i.e., is the 3 000 cm⁻¹ peak a C–H stretch? Is the 250 cm⁻¹
+peak a symmetric Mn–Cl breathing mode? This tool answers that.
 
-The classification is a **geometry-based heuristic**:
-for every mode we look at *how the atoms move* and decide, using bond/angle
+Thus for every mode we look at *how the atoms move* and decide, using bond/angle
 metrics, which internal coordinate (stretch, bend, wag, rock, twist, umbrella, …)
 dominates the motion.
 
@@ -32,49 +31,25 @@ dominates the motion.
 
 ```
 tmcm-mncl3-raman/
-├── README.md                     <- you are here
-├── .gitignore                     <- ignores generated files & the 2.4 GB OUTCAR
+├── README.md                     <- brief intro
 ├── requirements.txt              <- pip dependencies
 ├── environment.yml               <- conda environment (alternative to pip)
-├── raman_mode_classifier.py      <- the classifier (run this)
-├── raman.ipynb                   <- same code as a runnable Jupyter notebook
-├── data/
+├── raman_mode_classifier.py      <- the mode classifier script (main)
+├── raman.ipynb                   <- same code for Jupyter notebook
+├── data/                         <- example input for TMCM-MnCl3    
 │   ├── POSCAR                    <- relaxed DFT structure (42 atoms, VASP5)
 │   ├── vasp_raman.dat            <- mode frequencies + Raman activities
 │   ├── phonon_displacements/     <- one file per mode: 123 x {mode}.txt
 │   │                                  (columns: index dx dy dz)
-│   └── OUTCAR.phon               <- NOT in git (2.4 GB). Symlink your own copy.
-│                                    Only needed for the A'/A'' symmetry column.
-├── scripts/
-│   ├── extract_modes_from_outcar.py  <- regenerate phonon_displacements/
-│   └── make_notebook.py              <- rebuild the .ipynb from the .py
-└── docs/
-    ├── report.pdf                <- full explanation of the method
-    ├── raman_activity_spectrum.png
-    └── report.tex                <- LaTeX source of report.pdf
+│   └──          
 ```
 
 ---
 
 ## Quick start
 
-### 1. Get the code and dependencies
 
-```bash
-git clone <your-repo-url> tmcm-mncl3-raman
-cd tmcm-mncl3-raman
-
-# either (a) pip:
-pip install -r requirements.txt
-# or (b) conda:
-conda env create -f environment.yml
-conda activate tmcm-mncl3
-```
-
-`requirements.txt` only needs `numpy`. The optional runs / plotting need
-`scipy` and `matplotlib`.
-
-### 2. Run the classifier
+### 1. Run the classifier
 
 The script reads its four inputs from the **current working directory** and
 writes three output files there too.  Copy `raman_mode_classifier.py` (or the
@@ -277,7 +252,7 @@ These are honest caveats, documented in detail in `docs/report.pdf`:
 ## Reproducing everything from scratch
 
 ```bash
-# 1. extract per-mode displacement files from your OUTCAR.phon
+# 1. extract per-mode displacement files from your OUTCAR from DFPT calculations
 python scripts/extract_modes_from_outcar.py OUTCAR.phon data/phonon_displacements
 
 # 2. (optional) symlink the OUTCAR for symmetry labels
@@ -303,10 +278,3 @@ cd docs && pdflatex report.tex && pdflatex report.tex
 
 ## License
 
-No license file is bundled. If you use this in a publication, please cite
-the DFT/experimental works you are comparing against and mention this tool.
-
-## Citation snippet (suggested)
-
-> Modes of TMCM-MnCl3 were labelled with the geometry-based classifier at
-> <repository-url> using phonon eigenvectors from VASP/phonopy.
