@@ -49,7 +49,7 @@ tmcm-mncl3-raman/
 
 ### `data/vasp_raman.dat`
 
-Produced using from the DFT OUTCAR using https://github.com/raman-sc/VASP.
+Produced using from the DFPT OUTCAR using https://github.com/raman-sc/VASP.
 Five columns :
 
 ```
@@ -72,11 +72,9 @@ Numeric columns per line:
 ```
 
 Each line is the atom index matching the POSCAR atom order and
-`dx dy dz` is its **displacement vector** (Å) in that mode. These come
-straight from the *"Eigenvectors and eigenvalues of the dynamical matrix"*
-section of `OUTCAR`. Regenerate them with scripts/Extract-displacements.ipynb
-
-
+`dx dy dz` is its **displacement vector** (Å) in that mode. These come 
+from the *"Eigenvectors and eigenvalues of the dynamical matrix"*
+section of `OUTCAR from Phonon calculations`. The files can be generated from scripts/Extract-displacements.ipynb
 
 ## How the classification works
 
@@ -91,9 +89,8 @@ section of `OUTCAR`. Regenerate them with scripts/Extract-displacements.ipynb
 
 3. **For each mode**:
    - Load its displacement vector (`dx dy dz` per atom).
-   - Measure **bond-length changes** (`Δr`) between every bonded pair.
-   - Measure **angle changes** (`Δθ`) at every relevant centre
-     (H-C-H, Cl-C-N, Cl-Mn-Cl, …).
+   - Measure **bond-length changes** between every bonded pair.
+   - Measure **angle changes** (`Δθ`) in H-C-H, Cl-C-N, Cl-Mn-Cl...
 
 4. **Thresholds**.
    BOND_CUTOFFS - tuned to covalent radii; defines the bond graph
@@ -102,7 +99,6 @@ section of `OUTCAR`. Regenerate them with scripts/Extract-displacements.ipynb
    
 5. **Rank modes.** Assignments are sorted by an internal *magnitude*
    and the top few written to the CSV/LaTeX outputs.
-
 
 ---
 
