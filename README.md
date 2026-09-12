@@ -21,7 +21,7 @@ Before you can compare theory to an experimental Raman spectrum you need to know
 peak a symmetric Mn–Cl breathing mode? This tool answers that.
 
 Thus for every mode we look at *how the atoms move* and decide, using bond/angle
-metrics, what (stretch, bend, wag, rock, twist...) dominates the motion.
+metrics, what dominates the motion.
 
 ---
 
