@@ -45,42 +45,6 @@ tmcm-mncl3-raman/
 
 ---
 
-
-## Quick start
-
-
-### 1. Run the classifier
-
-The script reads its four inputs from the **current working directory** and
-writes three output files there too.  Copy `raman_mode_classifier.py` (or the
-notebook) into the folder that already contains your VASP files, then run:
-
-```bash
-cd /path/to/your/TMCM-MnCl3/DFT        # must contain POSCAR, vasp_raman.dat, etc.
-cp /path/to/repo/raman_mode_classifier.py .
-python raman_mode_classifier.py
-```
-
-If you want symmetry labels (`A'` / `A''`), place `OUTCAR.phon` in the same
-directory (or symlink it):
-
-```bash
-ln -s /path/to/your/OUTCAR.phon .
-```
-
-> **Quick test inside the repo.** The `data/` directory holds sample copies of
-> the inputs.  To run without a 2.4 GB OUTCAR symlinked the A'/A'' column
-> simply shows `?`; with it:
->
-> ```bash
-> cd data
-> python ../raman_mode_classifier.py
-> ```
-
-
-
----
-
 ## Input data formats
 
 ### `data/vasp_raman.dat`
@@ -114,7 +78,7 @@ section of `OUTCAR`. Regenerate them with scripts/Extract-displacements.ipynb
 
 
 
-## How the classification works (short version)
+## How the classification works
 
 1. **Read the structure.** `load_poscar()` parses the lattice + coordinates,
    wraps all positions into the unit cell (periodic boundary conditions).
@@ -136,7 +100,7 @@ section of `OUTCAR`. Regenerate them with scripts/Extract-displacements.ipynb
    ANGLE_CHANGE_THRESHOLD - minimum angle-change for bend/scissor/wag labels. Angles that move < 10° are ignored
    BOND_ABS_THRESHOLD -minimum absolute bond-change for a "stretch" label. A bond that stretches less than 10⁻² Å is ignored |
    
-5. **Rank and report.** Assignments are sorted by an internal *magnitude*
+5. **Rank modes.** Assignments are sorted by an internal *magnitude*
    and the top few written to the CSV/LaTeX outputs.
 
 
