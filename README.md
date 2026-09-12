@@ -30,19 +30,17 @@ metrics, what (stretch, bend, wag, rock, twist...) dominates the motion.
 ```
 tmcm-mncl3-raman/
 ├── README.md                     <- brief intro
-├── requirements.txt              <- pip dependencies
-├── environment.yml               <- conda environment (alternative to pip)
-├── raman_mode_classifier.py      <- the mode classifier script (main)
-├── raman.ipynb                   <- same code for Jupyter notebook
+├── requirements.txt             
 ├── data/                         <- example input for TMCM-MnCl3    
 │   ├── POSCAR                    <- relaxed DFT structure (42 atoms, VASP5)
 │   ├── vasp_raman.dat            <- mode frequencies + Raman activities
-│   ├── phonon_displacements/     <- one file per mode: 123 x {mode}.txt
-│   │                                  (columns: index dx dy dz)
+│   ├── phonon_displacements/     <- generate from Extract-displacements.ipynb                         
 │   └──
 ├── scripts/
 │   ├── Extract-displacements.ipynb  <- generate phonon_displacements/ folder with the disptacement of each of the 123 modes
-│   └── make_notebook.py              <- rebuild the .ipynb from the .py        
+│   └── raman_mode_classifier.py      <- the mode classifier script (main)
+│   └── raman.ipynb                   <- same code for Jupyter notebook
+
 ```
 
 ---
